@@ -67,5 +67,7 @@ int main(int argc, char **argv)
 
     arguments.PrintInfo();
 
+    printf("Compile %s...\n", arguments.inputfilename.data());
+
     return static_cast<int>(LEShaderConverterReturnCode::OK);
 }

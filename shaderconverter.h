@@ -28,13 +28,59 @@ OTHER DEALINGS IN THE SOFTWARE.
 #ifndef LESHADERCONVERTER_SHADERCONVERTER_H_
 #define LESHADERCONVERTER_SHADERCONVERTER_H_
 
+#include <string>
+
 namespace leshaderconverter {
+class ShaderCompilerInterface
+{
+public:
+    enum class CompileResult {
+        OK = 0,
+        CompilationFailed,
+    };
+public:
+    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) = 0;
+};
+
+class ShaderCompiler_FXC : public ShaderCompilerInterface
+{
+public:
+    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) override;
+};
+
+class ShaderCompiler_DXC : public ShaderCompilerInterface
+{
+public:
+    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) override;
+};
+
 class ShaderConverter
 {
 public:
+    enum class ConvertResult {
+        OK = 0,
+    };
+    
+    struct ConvertArguments {
+        enum class CompileTarget {
+            None = 0,
+            VS_5_0,     // fxc
+            VS_6_0,         // dxc
+            PS_5_0,         // fxc
+            PS_6_0          // dxc
+        } target = CompileTarget::None;
+        std::string inputpath;
+        std::string outputpath;
+
+        std::string entrypoint;
+    };
+
+public:
     ShaderConverter() {}
     virtual ~ShaderConverter() {}
+
+    ConvertResult Convert(const ConvertArguments &args);
 };
-}
+} // namespace leshaderconverter
 
 #endif

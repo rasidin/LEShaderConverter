@@ -58,6 +58,9 @@ Arguments ArgumentsFactory::CreateArguments(int argc, char** argv)
                 output.outputfilename = argv[argidx];
             }
         }
+        if (output.outputfilename.length() == 0) { // Generate Output filename
+
+        }
     }
 
     return output;
