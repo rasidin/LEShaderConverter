@@ -21,39 +21,34 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
-@file  shaderconverter.h
-@brief Shader converter implementation
+@file  ps5_0_test.vs
+@brief Pixel shader for testing (PixelShader model 5)
 @author minseob (leeminseob@outlook.com)
 **********************************************************************/
-#ifndef LESHADERCONVERTER_ARGUMENTS_H_
-#define LESHADERCONVERTER_ARGUMENTS_H_
-
-#include <string>
-#include <vector>
-
-namespace leshaderconverter {
-struct Arguments
+struct PS_INPUT
 {
-    std::string inputfilename;
-    std::string outputfilename;
-    std::string name;
-    std::string entrypoint;
-    std::string target;
-    std::vector<std::string> options;
-
-    bool IsValid() const;
-
-    Arguments() {}
-    void PrintInfo() const;
-
-    friend class ArgumentsFactory;
+	float4 pos : SV_POSITION;
+	float4 color : COLOR;
+	float2 uv : TEXCOORD0;
 };
 
-class ArgumentsFactory
+struct PS_OUTPUT
 {
-public:
-    static Arguments CreateArguments(int argc, char **argv);
+	float4 color : SV_Target0;
 };
+
+SamplerState defaultSampler
+{
+	Filter = MIN_MAG_MIP_LINEAR;
+	AddressU = Wrap;
+	AddressV = Wrap;
+};
+Texture2D tex0;
+
+PS_OUTPUT ps_main(PS_INPUT In)
+{
+	PS_OUTPUT output = (PS_OUTPUT)0;
+	output.color = tex0.Sample(defaultSampler, In.uv) * In.color;
+
+	return output;
 }
-
-#endif

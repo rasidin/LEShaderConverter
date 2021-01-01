@@ -29,29 +29,40 @@ OTHER DEALINGS IN THE SOFTWARE.
 #define LESHADERCONVERTER_SHADERCONVERTER_H_
 
 #include <string>
+#include <vector>
+
+#include "shadercompilationresult.h"
 
 namespace leshaderconverter {
 class ShaderCompilerInterface
 {
 public:
-    enum class CompileResult {
-        OK = 0,
-        CompilationFailed,
+    enum class CompileOptions {
+        None                = 0,
+        Debug               = 1 << 0,
+        SkipValidation      = 1 << 1,
+        SkipOptimization    = 1 << 2,
+        PartialPrecision    = 1 << 5,
+        OptimizationLevel0  = 1 <<14,
+        OptimizationLevel1  = 1 <<15,
+        OptimizationLevel2  = 1 <<16,
+        OptimizationLevel3  = 1 <<17,
     };
+
 public:
-    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) = 0;
+    virtual ShaderCompilationResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target, uint32_t options) = 0;
 };
 
 class ShaderCompiler_FXC : public ShaderCompilerInterface
 {
 public:
-    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) override;
+    virtual ShaderCompilationResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target, uint32_t options) override;
 };
 
 class ShaderCompiler_DXC : public ShaderCompilerInterface
 {
 public:
-    virtual CompileResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target) override;
+    virtual ShaderCompilationResult Compile(const std::string& inputpath, const std::string& entrypoint, const std::string& target, uint32_t options) override;
 };
 
 class ShaderConverter
@@ -59,6 +70,9 @@ class ShaderConverter
 public:
     enum class ConvertResult {
         OK = 0,
+        FailedToOpenFile,
+        ShaderComplationFailed,
+        HeaderGenerationFailed,
     };
     
     struct ConvertArguments {
@@ -71,8 +85,24 @@ public:
         } target = CompileTarget::None;
         std::string inputpath;
         std::string outputpath;
-
+        std::string classname;
         std::string entrypoint;
+        uint32_t options;
+        
+        ConvertArguments(
+            const std::string& in_inputpath,
+            const std::string& in_outputpath,
+            const std::string& in_classname,
+            const std::string& in_entrypoint,
+            const CompileTarget& in_target,
+            uint32_t in_options)
+            : inputpath(in_inputpath)
+            , outputpath(in_outputpath)
+            , classname(in_classname)
+            , entrypoint(in_entrypoint)
+            , target(in_target)
+            , options(in_options)
+        {}
     };
 
 public:

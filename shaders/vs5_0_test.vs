@@ -21,39 +21,32 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
-@file  shaderconverter.h
-@brief Shader converter implementation
+@file  vs5_0_test.vs
+@brief Vertex shader for testing (Vertex shader model 5)
 @author minseob (leeminseob@outlook.com)
 **********************************************************************/
-#ifndef LESHADERCONVERTER_ARGUMENTS_H_
-#define LESHADERCONVERTER_ARGUMENTS_H_
-
-#include <string>
-#include <vector>
-
-namespace leshaderconverter {
-struct Arguments
+struct VS_INPUT
 {
-    std::string inputfilename;
-    std::string outputfilename;
-    std::string name;
-    std::string entrypoint;
-    std::string target;
-    std::vector<std::string> options;
-
-    bool IsValid() const;
-
-    Arguments() {}
-    void PrintInfo() const;
-
-    friend class ArgumentsFactory;
+	float4 pos		: POSITION;
+	float4 color	: COLOR0;
+	float2 uv		: TEXCOORD0;
 };
 
-class ArgumentsFactory
+struct VS_OUTPUT
 {
-public:
-    static Arguments CreateArguments(int argc, char **argv);
+	float4 pos		: SV_POSITION;
+	float4 color	: COLOR0;
+	float2 uv		: TEXCOORD0;
 };
+
+VS_OUTPUT vs_main(VS_INPUT In)
+{
+	VS_OUTPUT output = (VS_OUTPUT)0;
+	output.pos.x = In.pos.x * 2 - 1;
+	output.pos.y = 1 - In.pos.y * 2;
+    output.pos.z = In.pos.z;
+	output.pos.w = 1;
+	output.color = In.color;
+    output.uv = In.uv;
+	return output;
 }
-
-#endif

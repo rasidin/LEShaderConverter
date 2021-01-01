@@ -21,39 +21,27 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
-@file  shaderconverter.h
-@brief Shader converter implementation
+@file  headergenerator.h
+@brief Header for shader generator
 @author minseob (leeminseob@outlook.com)
 **********************************************************************/
-#ifndef LESHADERCONVERTER_ARGUMENTS_H_
-#define LESHADERCONVERTER_ARGUMENTS_H_
+#ifndef LESHADERCONVERTER_HEADERGENERATOR_H_
+#define LESHADERCONVERTER_HEADERGENERATOR_H_
 
-#include <string>
-#include <vector>
+#include "shadercompilationresult.h"
 
 namespace leshaderconverter {
-struct Arguments
-{
-    std::string inputfilename;
-    std::string outputfilename;
-    std::string name;
-    std::string entrypoint;
-    std::string target;
-    std::vector<std::string> options;
-
-    bool IsValid() const;
-
-    Arguments() {}
-    void PrintInfo() const;
-
-    friend class ArgumentsFactory;
-};
-
-class ArgumentsFactory
+class HeaderGenerator
 {
 public:
-    static Arguments CreateArguments(int argc, char **argv);
+    enum class GenerateResult {
+        OK = 0,
+        FailedToOpenFile,
+    };
+
+public:
+    static GenerateResult WriteToFile(const char* filepath, const char* classname, const ShaderCompilationResult& result);
 };
 }
 
-#endif
+#endif // LESHADERCONVERTER_HEADERGENERATOR_H_

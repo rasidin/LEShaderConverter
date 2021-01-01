@@ -27,10 +27,12 @@ OTHER DEALINGS IN THE SOFTWARE.
 **********************************************************************/
 #include "arguments.h"
 
+#include <cassert>
+
 namespace leshaderconverter {
 bool Arguments::IsValid() const 
 {
-    if (inputfilename.empty())
+    if (inputfilename.empty() || name.empty() || entrypoint.empty() || target.empty())
         return false;
     return true;
 }
@@ -41,6 +43,15 @@ void Arguments::PrintInfo() const
         printf("Input = %s\n", inputfilename.data());
     if (outputfilename.length() > 0)
         printf("Output = %s\n", outputfilename.data());
+    if (name.length() > 0)
+        printf("Name = %s\n", outputfilename.data());
+    if (entrypoint.length() > 0)
+        printf("Entry = %s\n", entrypoint.data());
+    if (target.length() > 0)
+        printf("Target = %s\n", target.data());
+    for (uint32_t optidx = 0; optidx < options.size(); optidx++) {
+        printf("Option[%d] = %s\n", optidx, options[optidx].data());
+    }
 }
 
 Arguments ArgumentsFactory::CreateArguments(int argc, char** argv)
@@ -50,6 +61,18 @@ Arguments ArgumentsFactory::CreateArguments(int argc, char** argv)
     if (argc > 1) {
         for (int argidx = 1; argidx < argc; argidx++) {
             if (argv[argidx][0] == '-') { // Option
+                if (argv[argidx][1] == 'E') {
+                    output.entrypoint = &argv[argidx][3];
+                }
+                else if (argv[argidx][1] == 'T') {
+                    output.target = &argv[argidx][3];
+                }
+                else if (argv[argidx][1] == 'N') {
+                    output.name = &argv[argidx][3];
+                }
+                else {
+                    output.options.push_back(std::string(&argv[argidx][1]));
+                }
             }
             else if (output.inputfilename.empty()) { // Input file
                 output.inputfilename = argv[argidx];
@@ -59,7 +82,7 @@ Arguments ArgumentsFactory::CreateArguments(int argc, char** argv)
             }
         }
         if (output.outputfilename.length() == 0) { // Generate Output filename
-
+            assert(false); // Unimplemented
         }
     }
 
