@@ -20,3 +20,6 @@ file(COPY ${FILES_SHADERS} DESTINATION ${PROJECT_BINARY_DIR})
 
 add_test(TestVS_5_0 LEShaderConverter -D -O0 -E=vs_main -T=VS_5_0 -N=TestVS vs5_0_test.vs vs5_0_test)
 add_test(TestPS_5_0 LEShaderConverter -D -O0 -E=ps_main -T=PS_5_0 -N=TestPS ps5_0_test.ps ps5_0_test)
+
+install(TARGETS LEShaderConverter
+		RUNTIME DESTINATION bin)
