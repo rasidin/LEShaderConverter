@@ -54,23 +54,8 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "class " << classname << std::endl;
     outstream << "{" << std::endl;
 
-    // codebin
-    outstream << "    static const char codebin[] = {" << std::endl;
-    for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
-        if (codebinidx % 32 == 0u) {
-            outstream << "        ";
-        }
-        if (codebinidx < result.codelength - 1) {
-            snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x, ", codeptr[codebinidx] & 0xff);
-            outstream << tempstrbuf;
-            if (codebinidx % 32 == 31u)
-                outstream << std::endl;
-        }
-        else { // end of code
-            snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x };", codeptr[codebinidx] & 0xff);
-            outstream << tempstrbuf << std::endl;
-        }
-    }
+    // codebin (just definition)
+    outstream << "    static const char codebin[];" << std::endl;
     
     // codesize
     snprintf(tempstrbuf, sizeof(tempstrbuf), "    static constexpr size_t codesize = %du;", result.codelength);
@@ -83,6 +68,24 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "    static size_t GetCodeSize() { return codesize; }" << std::endl;
 
     outstream << "};" << std::endl;
+
+    // codebin (data)
+    outstream << "const char " << classname << "::codebin[] = {" << std::endl;
+    for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
+        if (codebinidx % 32 == 0u) {
+            outstream << "    ";
+        }
+        if (codebinidx < result.codelength - 1) {
+            snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x, ", codeptr[codebinidx] & 0xff);
+            outstream << tempstrbuf;
+            if (codebinidx % 32 == 31u)
+                outstream << std::endl;
+        }
+        else { // end of code
+            snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x };", codeptr[codebinidx] & 0xff);
+            outstream << tempstrbuf << std::endl;
+        }
+    }
 
     outstream << "} // namespace LimitEngine" << std::endl;
     outstream << "#endif" << std::endl;

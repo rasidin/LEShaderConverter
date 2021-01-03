@@ -4,3 +4,4 @@
 
 /.vs
 /out/build
+/out/install/x64-Debug/bin/LEShaderConverter.exe
