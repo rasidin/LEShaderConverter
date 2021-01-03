@@ -55,14 +55,14 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "{" << std::endl;
 
     // codebin (just definition)
-    outstream << "    static const char codebin[];" << std::endl;
+    outstream << "    static const uint8_t codebin[];" << std::endl;
     
     // codesize
     snprintf(tempstrbuf, sizeof(tempstrbuf), "    static constexpr size_t codesize = %du;", result.codelength);
     outstream << tempstrbuf << std::endl;
 
     // GetCodeBin
-    outstream << "    static const char* GetCodeBin() { return codebin; }" << std::endl;
+    outstream << "    static const uint8_t* GetCodeBin() { return codebin; }" << std::endl;
 
     // GetCodeSize
     outstream << "    static size_t GetCodeSize() { return codesize; }" << std::endl;
@@ -70,7 +70,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "};" << std::endl;
 
     // codebin (data)
-    outstream << "const char " << classname << "::codebin[] = {" << std::endl;
+    outstream << "const uint8_t " << classname << "::codebin[] = {" << std::endl;
     for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
         if (codebinidx % 32 == 0u) {
             outstream << "    ";
