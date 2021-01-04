@@ -57,7 +57,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "{" << std::endl;
 
     // codebin (just definition)
-    outstream << "    static const uint8_t codebin[];" << std::endl;
+    outstream << "    static const uint8 codebin[];" << std::endl;
     
     // codesize
     snprintf(tempstrbuf, sizeof(tempstrbuf), "    static constexpr size_t codesize = %du;", result.codelength);
@@ -129,19 +129,19 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "    virtual const String GetName() const { return String(\"" << classname << "\"); }" << std::endl;
 
     // GetCodeBin
-    outstream << "    virtual const uint8_t* GetCompiledCodeBin() const { return codebin; }" << std::endl;
+    outstream << "    virtual const uint8* GetCompiledCodeBin() const { return &codebin[0]; }" << std::endl;
 
     // GetCodeSize
     outstream << "    virtual const size_t GetCompiledCodeSize() const { return codesize; }" << std::endl;
 
     // GetConstantBufferCount
-    outstream << "    virtual const uint32_t GetConstantBufferCount() const { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetConstantBufferCount() const { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
 
     // GetBoundTextureCount
-    outstream << "    virtual const uint32_t GetBoundTextureCount() const { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetBoundTextureCount() const { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
 
     // GetBoundSamplerCount
-    outstream << "    virtual const uint32_t GetBoundSamplerCount() const { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetBoundSamplerCount() const { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
 
     outstream << "};" << std::endl;
 
