@@ -49,9 +49,11 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "#ifndef _SHADER_" << classname << "_H_" << std::endl;
     outstream << "#define _SHADER_" << classname << "_H_" << std::endl << std::endl;
 
+    outstream << "#include \"Renderer/Shader.h\"" << std::endl << std::endl;
+
     outstream << "namespace LimitEngine {" << std::endl;
 
-    outstream << "class " << classname << std::endl;
+    outstream << "class " << classname << " : public Shader" << std::endl;
     outstream << "{" << std::endl;
 
     // codebin (just definition)
@@ -59,13 +61,87 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     
     // codesize
     snprintf(tempstrbuf, sizeof(tempstrbuf), "    static constexpr size_t codesize = %du;", result.codelength);
-    outstream << tempstrbuf << std::endl;
+    outstream << tempstrbuf << std::endl << std::endl;
+
+    // bound resource
+    std::vector<char*> texturenames;
+    std::vector<char*> samplernames;
+    uint32_t currentboundresourceindex = 0u;
+    for (uint32_t bridx = 0; bridx < result.boundresources.size(); bridx++) {
+        const ShaderBoundResource& currentboundresource = result.boundresources[bridx];
+        if (currentboundresource.inputtype == ShaderBoundResource::InputType::Texture) {
+            assert(texturenames.size() <= currentboundresource.bindpoint);
+            while (texturenames.size() != currentboundresource.bindpoint) {
+                texturenames.push_back(nullptr);
+            }
+            texturenames.push_back(currentboundresource.name.get());
+        }
+        else if (currentboundresource.inputtype == ShaderBoundResource::InputType::Sampler) {
+            assert(samplernames.size() <= currentboundresource.bindpoint);
+            while (samplernames.size() != currentboundresource.bindpoint) {
+                samplernames.push_back(nullptr);
+            }
+            samplernames.push_back(currentboundresource.name.get());
+        }
+    }
+
+    if (texturenames.size() > 0) {
+        outstream << "    static const char* texturenames[];" << std::endl;
+    }
+
+    if (samplernames.size() > 0) {
+        outstream << "    static const char* samplernames[];" << std::endl;
+    }
+
+    if (texturenames.size() > 0 || samplernames.size() > 0)
+        outstream << std::endl;
+
+    // constant buffer structure
+    outstream << "public:" << std::endl;
+    for (uint32_t cbidx = 0; cbidx < result.constantbuffers.size(); cbidx++) {
+        const ShaderConstantBuffer& currentconstantbuffer = result.constantbuffers[cbidx];
+
+        uint32_t currentoffsetinbytes = 0u;
+        uint32_t currentpaddingindex = 0u;
+        snprintf(tempstrbuf, sizeof(tempstrbuf), "ConstantBuffer%d", cbidx);
+        outstream << "    struct " << tempstrbuf << " {" << std::endl;
+        for (uint32_t varidx = 0; varidx < currentconstantbuffer.variables.size(); varidx++) {
+            const ShaderVariable& currentvariable = currentconstantbuffer.variables[varidx];
+            if (currentvariable.sizeinbytes == 0) continue;
+            assert(currentvariable.startoffsetinbytes >= currentoffsetinbytes);
+
+            if (currentvariable.startoffsetinbytes > currentoffsetinbytes) {
+                snprintf(tempstrbuf, sizeof(tempstrbuf), "padding%d[%d]", currentpaddingindex++, currentvariable.startoffsetinbytes - currentoffsetinbytes);
+                outstream << "    uint8 " << tempstrbuf << ";" << std::endl;
+                currentoffsetinbytes = currentvariable.startoffsetinbytes;
+            }
+            assert(currentvariable.sizeinbytes % 4 == 0);
+            snprintf(tempstrbuf, sizeof(tempstrbuf), "%s[%d]", currentvariable.name.get(), currentvariable.sizeinbytes / 4);
+            outstream << "    float " << tempstrbuf << ";" << std::endl;
+            currentoffsetinbytes += currentvariable.sizeinbytes;
+        }
+        outstream << "};" << std::endl;
+    }
+
+    outstream << "public:" << std::endl;
+    // Virtual interfaces
+    // GetName
+    outstream << "    virtual const String GetName() const { return String(\"" << classname << "\"); }" << std::endl;
 
     // GetCodeBin
-    outstream << "    static const uint8_t* GetCodeBin() { return codebin; }" << std::endl;
+    outstream << "    virtual const uint8_t* GetCompiledCodeBin() const { return codebin; }" << std::endl;
 
     // GetCodeSize
-    outstream << "    static size_t GetCodeSize() { return codesize; }" << std::endl;
+    outstream << "    virtual const size_t GetCompiledCodeSize() const { return codesize; }" << std::endl;
+
+    // GetConstantBufferCount
+    outstream << "    virtual const uint32_t GetConstantBufferCount() const { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
+
+    // GetBoundTextureCount
+    outstream << "    virtual const uint32_t GetBoundTextureCount() const { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
+
+    // GetBoundSamplerCount
+    outstream << "    virtual const uint32_t GetBoundSamplerCount() const { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
 
     outstream << "};" << std::endl;
 
@@ -85,6 +161,33 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
             snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x };", codeptr[codebinidx] & 0xff);
             outstream << tempstrbuf << std::endl;
         }
+    }
+
+    // textures (data)
+    if (texturenames.size() > 0) {
+        outstream << "const char* " << classname << "::texturenames[] = {" << std::endl;
+        for (std::vector<char*>::iterator it = texturenames.begin(); it != texturenames.end(); ++it) {
+            if (*it) {
+                outstream << "    \"" << *it << "\"," << std::endl;
+            }
+            else {
+                outstream << "    \"\"," << std::endl;
+            }
+        }
+        outstream << "};" << std::endl;
+    }
+    // samplers (data)
+    if (samplernames.size() > 0) {
+        outstream << "const char* " << classname << "::samplernames[] = {" << std::endl;
+        for (std::vector<char*>::iterator it = samplernames.begin(); it != samplernames.end(); ++it) {
+            if (*it) {
+                outstream << "    \"" << *it << "\"," << std::endl;
+            }
+            else {
+                outstream << "    \"\"," << std::endl;
+            }
+        }
+        outstream << "};" << std::endl;
     }
 
     outstream << "} // namespace LimitEngine" << std::endl;

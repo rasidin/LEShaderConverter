@@ -52,20 +52,19 @@ std::string ConvertToEntryPointString(const ShaderConverter::ConvertArguments::C
     return std::string(EntryPointStrings[static_cast<int>(target)]);
 }
 
-ShaderVariable ConvertToShaderVariable(const D3D12_SHADER_VARIABLE_DESC& desc)
+ShaderVariable& ConvertToShaderVariable(ShaderVariable &out, const D3D12_SHADER_VARIABLE_DESC& desc)
 {
-    ShaderVariable output;
-    output.name = _strdup(desc.Name);
-    output.startoffsetinbytes = desc.StartOffset;
-    output.sizeinbytes = desc.Size;
-    output.starttexture = desc.StartTexture;
-    output.texturenum = desc.TextureSize;
-    output.startsampler = desc.StartSampler;
-    output.samplernum = desc.SamplerSize;
-    return output;
+    out.name.reset(_strdup(desc.Name));
+    out.startoffsetinbytes = desc.StartOffset;
+    out.sizeinbytes = desc.Size;
+    out.starttexture = desc.StartTexture;
+    out.texturenum = desc.TextureSize;
+    out.startsampler = desc.StartSampler;
+    out.samplernum = desc.SamplerSize;
+    return out;
 }
 
-ShaderBoundResource ConvertToShaderBoundResource(const D3D12_SHADER_INPUT_BIND_DESC& desc)
+ShaderBoundResource& ConvertToShaderBoundResource(ShaderBoundResource &out, const D3D12_SHADER_INPUT_BIND_DESC& desc)
 {
     static const ShaderBoundResource::InputType ConvertToShaderBoundResourceInputType[] = {
         ShaderBoundResource::InputType::CBuffer,                        // D3D_SIT_CBUFFER
@@ -106,15 +105,14 @@ ShaderBoundResource ConvertToShaderBoundResource(const D3D12_SHADER_INPUT_BIND_D
         ShaderBoundResource::SRVDimensionType::TextureCubeArray,    // D3D_SRV_DIMENSION_TEXTURECUBEARRAY
     };
 
-    ShaderBoundResource output;
-    output.name = _strdup(desc.Name);
-    output.inputtype = ConvertToShaderBoundResourceInputType[static_cast<uint32_t>(desc.Type)];
-    output.bindpoint = desc.BindPoint;
-    output.bindnum = desc.BindCount;
-    output.returntype = ConvertToShaderBoundResourceReturnType[static_cast<uint32_t>(desc.ReturnType)];
-    output.srvdimensiontype = ConverToShaderBoundResourceSRVDimensionType[static_cast<uint32_t>(desc.Dimension)];
-    output.samplenum = desc.NumSamples;
-    return output;
+    out.name.reset(_strdup(desc.Name));
+    out.inputtype = ConvertToShaderBoundResourceInputType[static_cast<uint32_t>(desc.Type)];
+    out.bindpoint = desc.BindPoint;
+    out.bindnum = desc.BindCount;
+    out.returntype = ConvertToShaderBoundResourceReturnType[static_cast<uint32_t>(desc.ReturnType)];
+    out.srvdimensiontype = ConverToShaderBoundResourceSRVDimensionType[static_cast<uint32_t>(desc.Dimension)];
+    out.samplenum = desc.NumSamples;
+    return out;
 }
 
 uint32_t ConvertToD3DCOMPILEFlags(uint32_t options)
@@ -129,24 +127,6 @@ uint32_t ConvertToD3DCOMPILEFlags(uint32_t options)
     if (options & static_cast<uint32_t>(ShaderCompilerInterface::CompileOptions::OptimizationLevel2)) output |= D3DCOMPILE_OPTIMIZATION_LEVEL2;
     if (options & static_cast<uint32_t>(ShaderCompilerInterface::CompileOptions::OptimizationLevel3)) output |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
     return output;
-}
-
-// -------------------------------------------------------------------
-// ShaderVariable
-// -------------------------------------------------------------------
-void ShaderVariable::Release()
-{
-    if (name) ::free(name);
-    name = nullptr;
-}
-
-// -------------------------------------------------------------------
-// ShaderBoundResource
-// -------------------------------------------------------------------
-void ShaderBoundResource::Release()
-{
-    if (name) ::free(name);
-    name = nullptr;
 }
 
 // -------------------------------------------------------------------
@@ -187,13 +167,14 @@ ShaderCompilationResult ShaderCompiler_FXC::Compile(const std::string &inputpath
                     ID3D12ShaderReflectionVariable* srvar = constantbuffer->GetVariableByIndex(varidx);
                     D3D12_SHADER_VARIABLE_DESC vardesc;
                     if (SUCCEEDED(srvar->GetDesc(&vardesc))) {
-                        newconstantbuffer.AddShaderVariable(ConvertToShaderVariable(vardesc));
+                        ConvertToShaderVariable(newconstantbuffer.AddShaderVariable(), vardesc);
                     }
                 }
             }
             for (uint32_t rbidx = 0; rbidx < shaderdesc.BoundResources; rbidx++) {
                 D3D12_SHADER_INPUT_BIND_DESC ibdesc;
                 shaderreflection->GetResourceBindingDesc(rbidx, &ibdesc);
+                ConvertToShaderBoundResource(result.AddBoundResources(), ibdesc);
             }
 
             result.code.reset(new char[code->GetBufferSize()]);

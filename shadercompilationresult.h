@@ -34,15 +34,13 @@ OTHER DEALINGS IN THE SOFTWARE.
 namespace leshaderconverter {
 struct ShaderVariable
 {
-    char*           name = nullptr;             // Name of the variable
-    uint32_t        startoffsetinbytes = 0u;    // Offset in constant buffer
-    uint32_t        sizeinbytes = 0u;           // Size of variable (in bytes)
-    uint32_t        starttexture = -1;          // First texture index (-1 if no textures used)
-    uint32_t        texturenum = 0u;            // Number of textures
-    uint32_t        startsampler = -1;          // First sampler index (-1 if no samplers used)
-    uint32_t        samplernum = 0;             // Number of samplers
-
-    void Release();
+    std::unique_ptr<char>   name;                       // Name of the variable
+    uint32_t                startoffsetinbytes = 0u;    // Offset in constant buffer
+    uint32_t                sizeinbytes = 0u;           // Size of variable (in bytes)
+    uint32_t                starttexture = -1;          // First texture index (-1 if no textures used)
+    uint32_t                texturenum = 0u;            // Number of textures
+    uint32_t                startsampler = -1;          // First sampler index (-1 if no samplers used)
+    uint32_t                samplernum = 0;             // Number of samplers
 };
 
 struct ShaderConstantBuffer
@@ -50,12 +48,12 @@ struct ShaderConstantBuffer
     size_t size = 0u;
     std::vector<ShaderVariable> variables;
 
-    inline void AddShaderVariable(const ShaderVariable &variable) { variables.emplace_back(variable); }
+    inline ShaderVariable& AddShaderVariable() { variables.push_back(ShaderVariable()); return variables.back(); }
 };
 
 struct ShaderBoundResource
 {
-    char* name;
+    std::unique_ptr<char> name;
     enum class InputType
     {
         CBuffer = 0,
@@ -101,8 +99,6 @@ struct ShaderBoundResource
         TextureCubeArray
     } srvdimensiontype;
     uint32_t samplenum;
-
-    void Release();
 };
 
 struct ShaderCompilationResult
@@ -121,8 +117,8 @@ struct ShaderCompilationResult
 
     inline bool IsValid() const { return resultcode == CompileResultValue::OK && code.get() && codelength > 0u; }
 
-    inline ShaderConstantBuffer& AddConstantBuffer() { constantbuffers.emplace_back(); return constantbuffers.back(); }
-    inline void AddBoundResources(const ShaderBoundResource& boundresource) { boundresources.emplace_back(boundresource); }
+    inline ShaderConstantBuffer& AddConstantBuffer() { constantbuffers.push_back(ShaderConstantBuffer()); return constantbuffers.back(); }
+    inline ShaderBoundResource& AddBoundResources() { boundresources.push_back(ShaderBoundResource()); return boundresources.back(); }
 };
 } // namespace leshaderconverter
 
