@@ -32,6 +32,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <string>
 
+#include "md5.h"
+
 namespace leshaderconverter {
 HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepath, const char *classname, const ShaderCompilationResult &result)
 {
@@ -120,10 +122,16 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
             outstream << "    float " << tempstrbuf << ";" << std::endl;
             currentoffsetinbytes += currentvariable.sizeinbytes;
         }
-        outstream << "};" << std::endl;
+        outstream << "    };" << std::endl;
     }
 
     outstream << "public:" << std::endl;
+    // Static interfaces
+    // GetHash
+    MD5 shaderhash = MD5::Generate(result.code.get(), result.codelength);
+    snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%08x, 0x%08x, 0x%08x, 0x%08x", shaderhash.data32[0], shaderhash.data32[1], shaderhash.data32[2], shaderhash.data32[3]);
+    outstream << "    static ShaderHash GetHash() const { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
+
     // Virtual interfaces
     // GetName
     outstream << "    virtual const String GetName() const { return String(\"" << classname << "\"); }" << std::endl;
