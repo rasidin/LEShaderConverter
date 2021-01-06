@@ -133,23 +133,25 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream << "    static ShaderHash GetHash() { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
 
     // Virtual interfaces
+    // GetShaderHash
+    outstream << "    virtual       ShaderHash GetShaderHash() const override { return GetHash(); }" << std::endl;
     // GetName
-    outstream << "    virtual const String GetName() const { return String(\"" << classname << "\"); }" << std::endl;
+    outstream << "    virtual const String GetName() const override { return String(\"" << classname << "\"); }" << std::endl;
 
     // GetCodeBin
-    outstream << "    virtual const uint8* GetCompiledCodeBin() const { return &codebin[0]; }" << std::endl;
+    outstream << "    virtual const uint8* GetCompiledCodeBin() const override { return &codebin[0]; }" << std::endl;
 
     // GetCodeSize
-    outstream << "    virtual const size_t GetCompiledCodeSize() const { return codesize; }" << std::endl;
+    outstream << "    virtual const size_t GetCompiledCodeSize() const override { return codesize; }" << std::endl;
 
     // GetConstantBufferCount
-    outstream << "    virtual const uint32 GetConstantBufferCount() const { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetConstantBufferCount() const override { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
 
     // GetBoundTextureCount
-    outstream << "    virtual const uint32 GetBoundTextureCount() const { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetBoundTextureCount() const override { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
 
     // GetBoundSamplerCount
-    outstream << "    virtual const uint32 GetBoundSamplerCount() const { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
+    outstream << "    virtual const uint32 GetBoundSamplerCount() const override { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
 
     outstream << "};" << std::endl;
 
