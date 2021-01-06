@@ -114,12 +114,12 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
 
             if (currentvariable.startoffsetinbytes > currentoffsetinbytes) {
                 snprintf(tempstrbuf, sizeof(tempstrbuf), "padding%d[%d]", currentpaddingindex++, currentvariable.startoffsetinbytes - currentoffsetinbytes);
-                outstream << "    uint8 " << tempstrbuf << ";" << std::endl;
+                outstream << "        uint8 " << tempstrbuf << ";" << std::endl;
                 currentoffsetinbytes = currentvariable.startoffsetinbytes;
             }
             assert(currentvariable.sizeinbytes % 4 == 0);
             snprintf(tempstrbuf, sizeof(tempstrbuf), "%s[%d]", currentvariable.name.get(), currentvariable.sizeinbytes / 4);
-            outstream << "    float " << tempstrbuf << ";" << std::endl;
+            outstream << "        float " << tempstrbuf << ";" << std::endl;
             currentoffsetinbytes += currentvariable.sizeinbytes;
         }
         outstream << "    };" << std::endl;
@@ -130,7 +130,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     // GetHash
     MD5 shaderhash = MD5::Generate(result.code.get(), result.codelength);
     snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%08x, 0x%08x, 0x%08x, 0x%08x", shaderhash.data32[0], shaderhash.data32[1], shaderhash.data32[2], shaderhash.data32[3]);
-    outstream << "    static ShaderHash GetHash() const { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
+    outstream << "    static ShaderHash GetHash() { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
 
     // Virtual interfaces
     // GetName
