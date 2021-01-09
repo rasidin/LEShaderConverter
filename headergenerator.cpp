@@ -68,6 +68,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     // bound resource
     std::vector<char*> texturenames;
     std::vector<char*> samplernames;
+    std::vector<char*> uavnames;
     uint32_t currentboundresourceindex = 0u;
     for (uint32_t bridx = 0; bridx < result.boundresources.size(); bridx++) {
         const ShaderBoundResource& currentboundresource = result.boundresources[bridx];
@@ -85,6 +86,15 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
             }
             samplernames.push_back(currentboundresource.name.get());
         }
+        else if (currentboundresource.inputtype == ShaderBoundResource::InputType::UAVAppendStructured ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVConsumeStructured ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVRWByteAddress ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVRWStrcturedWithCounter ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVRWStructured ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVRWTyped ||
+                 currentboundresource.inputtype == ShaderBoundResource::InputType::UAVStructured) {
+            uavnames.push_back(currentboundresource.name.get());
+        }
     }
 
     if (texturenames.size() > 0) {
@@ -93,6 +103,10 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
 
     if (samplernames.size() > 0) {
         outstream << "    static const char* samplernames[];" << std::endl;
+    }
+
+    if (uavnames.size() > 0) {
+        outstream << "    static const char* uavnames[];" << std::endl;
     }
 
     if (texturenames.size() > 0 || samplernames.size() > 0)
@@ -153,6 +167,9 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     // GetBoundSamplerCount
     outstream << "    virtual const uint32 GetBoundSamplerCount() const override { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
 
+    // GetBoundUAVCount
+    outstream << "    virtual const uint32 GetUAVCount() const override { return " << static_cast<uint32_t>(uavnames.size()) << "; }" << std::endl;
+
     outstream << "};" << std::endl;
 
     // codebin (data)
@@ -190,6 +207,19 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     if (samplernames.size() > 0) {
         outstream << "const char* " << classname << "::samplernames[] = {" << std::endl;
         for (std::vector<char*>::iterator it = samplernames.begin(); it != samplernames.end(); ++it) {
+            if (*it) {
+                outstream << "    \"" << *it << "\"," << std::endl;
+            }
+            else {
+                outstream << "    \"\"," << std::endl;
+            }
+        }
+        outstream << "};" << std::endl;
+    }
+    // UAVs (data)
+    if (uavnames.size() > 0) {
+        outstream << "const char* " << classname << "::uavnames[] = {" << std::endl;
+        for (std::vector<char*>::iterator it = uavnames.begin(); it != uavnames.end(); ++it) {
             if (*it) {
                 outstream << "    \"" << *it << "\"," << std::endl;
             }
