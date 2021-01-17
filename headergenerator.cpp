@@ -39,11 +39,11 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
 {
     std::string headerfilepath = std::string(filepath) + ".h";
     std::string headerfilename;
-    if (headerfilepath.find_last_of('\\') != std::string::npos) {
-        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("\\") + 1, headerfilepath.size());
+    if (headerfilepath.find_last_of('/') != std::string::npos) {
+        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("/") + 1, headerfilepath.size());
     }
     else {
-        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("/") + 1, headerfilepath.size());
+        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("\\") + 1, headerfilepath.size());
     }
         
     std::ofstream outstream_header(headerfilepath);
@@ -193,7 +193,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
 
     outstream_cpp << "namespace LimitEngine {" << std::endl;
     // codebin (data)
-    outstream_cpp << "const uint8_t " << classname << "::codebin[] = {" << std::endl;
+    outstream_cpp << "const uint8 " << classname << "::codebin[] = {" << std::endl;
     for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
         if (codebinidx % 32 == 0u) {
             outstream_cpp << "    ";
