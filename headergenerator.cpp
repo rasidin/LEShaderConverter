@@ -37,9 +37,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 namespace leshaderconverter {
 HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepath, const char *classname, const ShaderCompilationResult &result)
 {
-    std::ofstream outstream(filepath);
+    std::ofstream outstream_header(std::string(filepath) + ".h");
 
-    if (!outstream) {
+    if (!outstream_header) {
         return GenerateResult::FailedToOpenFile;
     }
 
@@ -47,23 +47,23 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     const char* codeptr = static_cast<const char*>(result.code.get());
     assert(codeptr);
 
-    outstream << "// Genarated by LEShaderConverter" << std::endl;
-    outstream << "#ifndef _SHADER_" << classname << "_H_" << std::endl;
-    outstream << "#define _SHADER_" << classname << "_H_" << std::endl << std::endl;
+    outstream_header << "// Genarated by LEShaderConverter" << std::endl;
+    outstream_header << "#ifndef _SHADER_" << classname << "_H_" << std::endl;
+    outstream_header << "#define _SHADER_" << classname << "_H_" << std::endl << std::endl;
 
-    outstream << "#include \"Renderer/Shader.h\"" << std::endl << std::endl;
+    outstream_header << "#include \"Renderer/Shader.h\"" << std::endl << std::endl;
 
-    outstream << "namespace LimitEngine {" << std::endl;
+    outstream_header << "namespace LimitEngine {" << std::endl;
 
-    outstream << "class " << classname << " : public Shader" << std::endl;
-    outstream << "{" << std::endl;
+    outstream_header << "class " << classname << " : public Shader" << std::endl;
+    outstream_header << "{" << std::endl;
 
     // codebin (just definition)
-    outstream << "    static const uint8 codebin[];" << std::endl;
+    outstream_header << "    static const uint8 codebin[];" << std::endl;
     
     // codesize
     snprintf(tempstrbuf, sizeof(tempstrbuf), "    static constexpr size_t codesize = %du;", result.codelength);
-    outstream << tempstrbuf << std::endl << std::endl;
+    outstream_header << tempstrbuf << std::endl << std::endl;
 
     // bound resource
     std::vector<char*> texturenames;
@@ -98,29 +98,29 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     }
 
     if (texturenames.size() > 0) {
-        outstream << "    static const char* texturenames[];" << std::endl;
+        outstream_header << "    static const char* texturenames[];" << std::endl;
     }
 
     if (samplernames.size() > 0) {
-        outstream << "    static const char* samplernames[];" << std::endl;
+        outstream_header << "    static const char* samplernames[];" << std::endl;
     }
 
     if (uavnames.size() > 0) {
-        outstream << "    static const char* uavnames[];" << std::endl;
+        outstream_header << "    static const char* uavnames[];" << std::endl;
     }
 
     if (texturenames.size() > 0 || samplernames.size() > 0)
-        outstream << std::endl;
+        outstream_header << std::endl;
 
     // constant buffer structure
-    outstream << "public:" << std::endl;
+    outstream_header << "public:" << std::endl;
     for (uint32_t cbidx = 0; cbidx < result.constantbuffers.size(); cbidx++) {
         const ShaderConstantBuffer& currentconstantbuffer = result.constantbuffers[cbidx];
 
         uint32_t currentoffsetinbytes = 0u;
         uint32_t currentpaddingindex = 0u;
         snprintf(tempstrbuf, sizeof(tempstrbuf), "ConstantBuffer%d", cbidx);
-        outstream << "    struct " << tempstrbuf << " {" << std::endl;
+        outstream_header << "    struct " << tempstrbuf << " {" << std::endl;
         for (uint32_t varidx = 0; varidx < currentconstantbuffer.variables.size(); varidx++) {
             const ShaderVariable& currentvariable = currentconstantbuffer.variables[varidx];
             if (currentvariable.sizeinbytes == 0) continue;
@@ -128,110 +128,117 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
 
             if (currentvariable.startoffsetinbytes > currentoffsetinbytes) {
                 snprintf(tempstrbuf, sizeof(tempstrbuf), "padding%d[%d]", currentpaddingindex++, currentvariable.startoffsetinbytes - currentoffsetinbytes);
-                outstream << "        uint8 " << tempstrbuf << ";" << std::endl;
+                outstream_header << "        uint8 " << tempstrbuf << ";" << std::endl;
                 currentoffsetinbytes = currentvariable.startoffsetinbytes;
             }
             assert(currentvariable.sizeinbytes % 4 == 0);
             snprintf(tempstrbuf, sizeof(tempstrbuf), "%s[%d]", currentvariable.name.get(), currentvariable.sizeinbytes / 4);
-            outstream << "        float " << tempstrbuf << ";" << std::endl;
+            outstream_header << "        float " << tempstrbuf << ";" << std::endl;
             currentoffsetinbytes += currentvariable.sizeinbytes;
         }
-        outstream << "    };" << std::endl;
+        outstream_header << "    };" << std::endl;
     }
 
-    outstream << "public:" << std::endl;
+    outstream_header << "public:" << std::endl;
     // Static interfaces
     // GetHash
     MD5 shaderhash = MD5::Generate(result.code.get(), result.codelength);
     snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%08x, 0x%08x, 0x%08x, 0x%08x", shaderhash.data32[0], shaderhash.data32[1], shaderhash.data32[2], shaderhash.data32[3]);
-    outstream << "    static ShaderHash GetHash() { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
+    outstream_header << "    static ShaderHash GetHash() { return ShaderHash(" << tempstrbuf << "); }" << std::endl;
 
     // Virtual interfaces
     // GetShaderHash
-    outstream << "    virtual       ShaderHash GetShaderHash() const override { return GetHash(); }" << std::endl;
+    outstream_header << "    virtual       ShaderHash GetShaderHash() const override { return GetHash(); }" << std::endl;
     // GetName
-    outstream << "    virtual const String GetName() const override { return String(\"" << classname << "\"); }" << std::endl;
+    outstream_header << "    virtual const String GetName() const override { return String(\"" << classname << "\"); }" << std::endl;
 
     // GetCodeBin
-    outstream << "    virtual const uint8* GetCompiledCodeBin() const override { return &codebin[0]; }" << std::endl;
+    outstream_header << "    virtual const uint8* GetCompiledCodeBin() const override { return &codebin[0]; }" << std::endl;
 
     // GetCodeSize
-    outstream << "    virtual const size_t GetCompiledCodeSize() const override { return codesize; }" << std::endl;
+    outstream_header << "    virtual const size_t GetCompiledCodeSize() const override { return codesize; }" << std::endl;
 
     // GetConstantBufferCount
-    outstream << "    virtual const uint32 GetConstantBufferCount() const override { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
+    outstream_header << "    virtual const uint32 GetConstantBufferCount() const override { return " << static_cast<uint32_t>(result.constantbuffers.size()) << "; }" << std::endl;
 
     // GetBoundTextureCount
-    outstream << "    virtual const uint32 GetBoundTextureCount() const override { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
+    outstream_header << "    virtual const uint32 GetBoundTextureCount() const override { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
 
     // GetBoundSamplerCount
-    outstream << "    virtual const uint32 GetBoundSamplerCount() const override { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
+    outstream_header << "    virtual const uint32 GetBoundSamplerCount() const override { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
 
     // GetBoundUAVCount
-    outstream << "    virtual const uint32 GetUAVCount() const override { return " << static_cast<uint32_t>(uavnames.size()) << "; }" << std::endl;
+    outstream_header << "    virtual const uint32 GetUAVCount() const override { return " << static_cast<uint32_t>(uavnames.size()) << "; }" << std::endl;
 
-    outstream << "};" << std::endl;
+    outstream_header << "};" << std::endl;
+    outstream_header << "} // namespace LimitEngine" << std::endl;
+    outstream_header << "#endif" << std::endl;
+
+    std::ofstream outstream_cpp(std::string(filepath) + ".cpp");
+    if (!outstream_header) {
+        return GenerateResult::FailedToOpenFile;
+    }
+
+    outstream_cpp << "// Genarated by LEShaderConverter" << std::endl;
+    outstream_cpp << "#include \"" << classname << ".h\"" << std::endl;
 
     // codebin (data)
-    outstream << "const uint8_t " << classname << "::codebin[] = {" << std::endl;
+    outstream_cpp << "const uint8_t " << classname << "::codebin[] = {" << std::endl;
     for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
         if (codebinidx % 32 == 0u) {
-            outstream << "    ";
+            outstream_cpp << "    ";
         }
         if (codebinidx < result.codelength - 1) {
             snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x, ", codeptr[codebinidx] & 0xff);
-            outstream << tempstrbuf;
+            outstream_cpp << tempstrbuf;
             if (codebinidx % 32 == 31u)
-                outstream << std::endl;
+                outstream_cpp << std::endl;
         }
         else { // end of code
             snprintf(tempstrbuf, sizeof(tempstrbuf), "0x%02x };", codeptr[codebinidx] & 0xff);
-            outstream << tempstrbuf << std::endl;
+            outstream_cpp << tempstrbuf << std::endl;
         }
     }
 
     // textures (data)
     if (texturenames.size() > 0) {
-        outstream << "const char* " << classname << "::texturenames[] = {" << std::endl;
+        outstream_cpp << "const char* " << classname << "::texturenames[] = {" << std::endl;
         for (std::vector<char*>::iterator it = texturenames.begin(); it != texturenames.end(); ++it) {
             if (*it) {
-                outstream << "    \"" << *it << "\"," << std::endl;
+                outstream_cpp << "    \"" << *it << "\"," << std::endl;
             }
             else {
-                outstream << "    \"\"," << std::endl;
+                outstream_cpp << "    \"\"," << std::endl;
             }
         }
-        outstream << "};" << std::endl;
+        outstream_cpp << "};" << std::endl;
     }
     // samplers (data)
     if (samplernames.size() > 0) {
-        outstream << "const char* " << classname << "::samplernames[] = {" << std::endl;
+        outstream_cpp << "const char* " << classname << "::samplernames[] = {" << std::endl;
         for (std::vector<char*>::iterator it = samplernames.begin(); it != samplernames.end(); ++it) {
             if (*it) {
-                outstream << "    \"" << *it << "\"," << std::endl;
+                outstream_cpp << "    \"" << *it << "\"," << std::endl;
             }
             else {
-                outstream << "    \"\"," << std::endl;
+                outstream_cpp << "    \"\"," << std::endl;
             }
         }
-        outstream << "};" << std::endl;
+        outstream_cpp << "};" << std::endl;
     }
     // UAVs (data)
     if (uavnames.size() > 0) {
-        outstream << "const char* " << classname << "::uavnames[] = {" << std::endl;
+        outstream_cpp << "const char* " << classname << "::uavnames[] = {" << std::endl;
         for (std::vector<char*>::iterator it = uavnames.begin(); it != uavnames.end(); ++it) {
             if (*it) {
-                outstream << "    \"" << *it << "\"," << std::endl;
+                outstream_cpp << "    \"" << *it << "\"," << std::endl;
             }
             else {
-                outstream << "    \"\"," << std::endl;
+                outstream_cpp << "    \"\"," << std::endl;
             }
         }
-        outstream << "};" << std::endl;
+        outstream_cpp << "};" << std::endl;
     }
-
-    outstream << "} // namespace LimitEngine" << std::endl;
-    outstream << "#endif" << std::endl;
 
     return GenerateResult::OK;
 }

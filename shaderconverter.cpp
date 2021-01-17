@@ -233,8 +233,7 @@ ShaderConverter::ConvertResult ShaderConverter::Convert(const ConvertArguments& 
     if (ShaderCompiler) {
         ShaderCompilationResult result = ShaderCompiler->Compile(args.inputpath, args.entrypoint, ConvertToEntryPointString(args.target), args.options);
         if (result.IsValid()) {
-            std::string outputheaderpath = args.outputpath + ".h";
-            if (HeaderGenerator::WriteToFile(outputheaderpath.data(), args.classname.data(), result) != HeaderGenerator::GenerateResult::OK) {
+            if (HeaderGenerator::WriteToFile(args.outputpath.data(), args.classname.data(), result) != HeaderGenerator::GenerateResult::OK) {
                 return ConvertResult::HeaderGenerationFailed;
             }
         }
