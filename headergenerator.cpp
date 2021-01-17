@@ -182,6 +182,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     outstream_cpp << "// Genarated by LEShaderConverter" << std::endl;
     outstream_cpp << "#include \"" << classname << ".h\"" << std::endl;
 
+    outstream_cpp << "namespace LimitEngine {" << std::endl;
     // codebin (data)
     outstream_cpp << "const uint8_t " << classname << "::codebin[] = {" << std::endl;
     for (uint32_t codebinidx = 0; codebinidx < result.codelength; codebinidx++) {
@@ -239,6 +240,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
         }
         outstream_cpp << "};" << std::endl;
     }
+    outstream_cpp << "} // namespace LimitEngine" << std::endl;
 
     return GenerateResult::OK;
 }
