@@ -37,7 +37,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 namespace leshaderconverter {
 HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepath, const char *classname, const ShaderCompilationResult &result)
 {
-    std::ofstream outstream_header(std::string(filepath) + ".h");
+    std::string headerfilepath = std::string(filepath) + ".h";
+    std::string headerfilename = headerfilepath.substr(headerfilepath.find_last_of("\\") + 1, headerfilepath.size());
+    std::ofstream outstream_header(headerfilepath);
 
     if (!outstream_header) {
         return GenerateResult::FailedToOpenFile;
@@ -180,7 +182,7 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     }
 
     outstream_cpp << "// Genarated by LEShaderConverter" << std::endl;
-    outstream_cpp << "#include \"" << classname << ".h\"" << std::endl;
+    outstream_cpp << "#include \"" << headerfilename << "\"" << std::endl;
 
     outstream_cpp << "namespace LimitEngine {" << std::endl;
     // codebin (data)
