@@ -38,7 +38,14 @@ namespace leshaderconverter {
 HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepath, const char *classname, const ShaderCompilationResult &result)
 {
     std::string headerfilepath = std::string(filepath) + ".h";
-    std::string headerfilename = headerfilepath.substr(headerfilepath.find_last_of("\\") + 1, headerfilepath.size());
+    std::string headerfilename;
+    if (headerfilepath.find_last_of('\\') != std::string::npos) {
+        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("\\") + 1, headerfilepath.size());
+    }
+    else {
+        headerfilename = headerfilepath.substr(headerfilepath.find_last_of("/") + 1, headerfilepath.size());
+    }
+        
     std::ofstream outstream_header(headerfilepath);
 
     if (!outstream_header) {
