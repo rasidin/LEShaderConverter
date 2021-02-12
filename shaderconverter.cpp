@@ -146,7 +146,7 @@ ShaderCompilationResult ShaderCompiler_FXC::Compile(const std::string &inputpath
     if (SUCCEEDED(D3DCompileFromFile(
         winputpath,
         nullptr,
-        nullptr,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE,
         entrypoint.c_str(),
         target.c_str(),
         ConvertToD3DCOMPILEFlags(options),
