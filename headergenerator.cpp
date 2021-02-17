@@ -122,7 +122,8 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
         outstream_header << std::endl;
 
     // constant buffer structure
-    outstream_header << "public:" << std::endl;
+    if (result.constantbuffers.size() > 0)
+        outstream_header << "public:" << std::endl;
     for (uint32_t cbidx = 0; cbidx < result.constantbuffers.size(); cbidx++) {
         const ShaderConstantBuffer& currentconstantbuffer = result.constantbuffers[cbidx];
 
@@ -173,8 +174,24 @@ HeaderGenerator::GenerateResult HeaderGenerator::WriteToFile(const char *filepat
     // GetBoundTextureCount
     outstream_header << "    virtual const uint32 GetBoundTextureCount() const override { return " << static_cast<uint32_t>(texturenames.size()) << "; }" << std::endl;
 
+    // GetBoundTextureNames
+    if (texturenames.size() > 0) {
+        outstream_header << "    virtual const char** GetBoundTextureNames() const override { return texturenames; }" << std::endl;
+    }
+    else {
+        outstream_header << "    virtual const char** GetBoundTextureNames() const override { return nullptr; }" << std::endl;
+    }
+
     // GetBoundSamplerCount
     outstream_header << "    virtual const uint32 GetBoundSamplerCount() const override { return " << static_cast<uint32_t>(samplernames.size()) << "; }" << std::endl;
+
+    // GetBoundSamplerNames
+    if (samplernames.size() > 0) {
+        outstream_header << "    virtual const char** GetBoundSamplerNames() const override { return samplernames; }" << std::endl;
+    }
+    else {
+        outstream_header << "    virtual const char** GetBoundSamplerNames() const override { return nullptr; }" << std::endl;
+    }
 
     // GetBoundUAVCount
     outstream_header << "    virtual const uint32 GetUAVCount() const override { return " << static_cast<uint32_t>(uavnames.size()) << "; }" << std::endl;
