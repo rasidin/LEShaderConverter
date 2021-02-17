@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  shaderconverter.cpp
 @brief Shader converter implementation
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #include "shaderconverter.h"
 

@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  headergenerator.cpp
 @brief Header for shader generator
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #include "headergenerator.h"
 

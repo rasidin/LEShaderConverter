@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  shadercompilationresult.h
 @brief Compilation result of shader
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #ifndef LESHADERCONVERTER_SHADERCOMPILATIONRESULT_H_
 #define LESHADERCONVERTER_SHADERCOMPILATIONRESULT_H_

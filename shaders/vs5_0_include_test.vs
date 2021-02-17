@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  vs5_0_test.vs
 @brief Vertex shader for testing (Vertex shader model 5)
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #include "vs5_0_include_header.vsh"
 

@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  vs5_0_include_header.vsh
 @brief shader test header
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 float3 ConvertOutPos(float3 input)
 {

@@ -4,7 +4,7 @@
  -----------------------------------------------------------
  @file  ResolveSceneColorSRGB.fsh
  @brief Resolve scene color
- @author minseob (leeminseob@outlook.com)
+ @author minseob (https://github.com/rasidin)
  ***********************************************************/
 struct PS_INPUT
 {

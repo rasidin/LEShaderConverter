@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  shaderconverter.h
 @brief Shader converter implementation
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #ifndef LESHADERCONVERTER_SHADERCONVERTER_H_
 #define LESHADERCONVERTER_SHADERCONVERTER_H_

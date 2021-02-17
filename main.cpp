@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  main.cpp
 @brief Main file
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #include <stdio.h>
 
@@ -85,7 +85,7 @@ uint32_t ConvertToCompileOptions(const std::vector<std::string>& options)
 void PrintUsage()
 {
     printf("LEShaderConverter %s\n", LEShaderConverterVersionName[static_cast<int>(LEShaderConverterVersion::Lastest)]);
-    printf("Progarammed by minseob (leeminseob@outlook.com)\n");
+    printf("Progarammed by minseob (https://github.com/rasidin)\n");
     printf("\n");
     printf("Usage : LEShaderConverter <ShaderFilePath> <OutputPath>\n");
 }

@@ -23,7 +23,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ----------------------------------------------------------------------
 @file  headergenerator.h
 @brief Header for shader generator
-@author minseob (leeminseob@outlook.com)
+@author minseob (https://github.com/rasidin)
 **********************************************************************/
 #ifndef LESHADERCONVERTER_HEADERGENERATOR_H_
 #define LESHADERCONVERTER_HEADERGENERATOR_H_
